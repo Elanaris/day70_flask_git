@@ -1,3 +1,4 @@
 Procfile
 blog.db
 .idea/
+.env
