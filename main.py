@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, redirect, url_for, flash, request, abort
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
@@ -9,7 +10,7 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 from flask_gravatar import Gravatar
 from functools import wraps
-import os
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
@@ -77,7 +78,7 @@ class Comment(db.Model):
     parent_post = relationship("BlogPost", back_populates="comments")
     date = db.Column(db.String(250), nullable=False)
 
-
+# Create a database:
 # db.create_all()
 
 # ADMIN and ERROR HANDLING
