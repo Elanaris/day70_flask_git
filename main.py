@@ -82,6 +82,7 @@ class Comment(db.Model):
 # Create a database:
 # db.create_all()
 
+
 # ADMIN and ERROR HANDLING
 @app.errorhandler(403)
 def unauthorised(e):
