@@ -12,17 +12,17 @@ from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
 from flask_gravatar import Gravatar
 from functools import wraps
 
+# ------------------------- APP INIT -------------------------
 load_dotenv()
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 ckeditor = CKEditor(app)
 Bootstrap(app)
 
 # CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL",  "sqlite:///blog.db")
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL",  "sqlite:///blog.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
-
 
 # LOGIN MANAGER
 login_manager = LoginManager()
@@ -37,15 +37,15 @@ def load_user(user_id):
 # GRAVATAR
 gravatar = Gravatar(app,
                     size=100,
-                    rating='g',
-                    default='retro',
+                    rating="g",
+                    default="retro",
                     force_default=False,
                     force_lower=False,
                     use_ssl=False,
                     base_url=None)
 
 
-# CONFIGURE TABLES
+# ------------------------- CONFIGURE DB -------------------------
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
@@ -83,10 +83,10 @@ class Comment(db.Model):
 # db.create_all()
 
 
-# ADMIN and ERROR HANDLING
+# ------------------------- ADMIN and ERROR HANDLING -------------------------
 @app.errorhandler(403)
 def unauthorised(e):
-    return render_template('403.html'), 403
+    return render_template("403.html"), 403
 
 
 def admin_only(f):
@@ -98,14 +98,19 @@ def admin_only(f):
     return decorated_function
 
 
-# ROUTES
-@app.route('/')
+# ------------------------- ROUTES -------------------------
+@app.route("/")
 def get_all_posts():
     posts = BlogPost.query.all()
     return render_template("index.html", all_posts=posts, current_user=current_user)
 
 
-@app.route('/register', methods=["GET", "POST"])
+@app.route("/about")
+def about():
+    return render_template("about.html", current_user=current_user)
+
+
+@app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -130,7 +135,7 @@ def register():
     return render_template("register.html", form=form, current_user=current_user)
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -142,26 +147,16 @@ def login():
                 login_user(user)
                 return redirect(url_for("get_all_posts"))
             else:
-                flash('Wrong password, please try again.')
+                flash("Wrong password, please try again.")
         else:
-            flash('The email does not exist, please try again.')
+            flash("The email does not exist, please try again.")
     return render_template("login.html", form=form, current_user=current_user)
 
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for('get_all_posts'))
-
-
-@app.route("/about")
-def about():
-    return render_template("about.html", current_user=current_user)
-
-
-@app.route("/contact")
-def contact():
-    return render_template("contact.html", current_user=current_user)
+    return redirect(url_for("get_all_posts"))
 
 
 @app.route("/new-post", methods=["GET", "POST"])
@@ -235,8 +230,9 @@ def delete_post(post_id):
     post_to_delete = BlogPost.query.get(post_id)
     db.session.delete(post_to_delete)
     db.session.commit()
-    return redirect(url_for('get_all_posts'))
+    return redirect(url_for("get_all_posts"))
 
 
+# ------------------------- RUN APP -------------------------
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
